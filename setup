@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# skillrot setup — make `skillrot` available to EVERY coding agent on this
+# machine, not just Claude Code. Puts the CLI on PATH (bun link) and symlinks
+# the SKILL.md into each installed agent's skills directory.
+#
+# Idempotent: safe to re-run after `git pull` to pick up updates.
+set -euo pipefail
+
+ROOT="$(cd -P "$(dirname "$0")" && pwd)"
+
+if ! command -v bun >/dev/null 2>&1; then
+	echo "Error: Bun is required. Install: curl -fsSL https://bun.sh/install | bash" >&2
+	exit 1
+fi
+
+echo "→ exposing 'skillrot' on PATH (bun link)"
+( cd "$ROOT" && bun link >/dev/null )
+
+# Agent → skills directory. We register into an agent only if it's installed
+# (its config dir exists), so this auto-adapts to whatever you run.
+# SKILL.md is a shared format across these tools, so a symlink is enough.
+register() {
+	local agent="$1" base="$2" skills_dir="$3"
+	[ -d "$base" ] || return 0
+	mkdir -p "$skills_dir"
+	ln -sfn "$ROOT/skills/skillrot" "$skills_dir/skillrot"
+	echo "  ✓ $agent → $skills_dir/skillrot"
+}
+
+echo "→ registering the skill with installed agents"
+# ~/.agents/skills is the shared, cross-tool location several agents read.
+register "shared (.agents)" "$HOME/.agents"        "$HOME/.agents/skills"
+register "Claude Code"      "$HOME/.claude"         "$HOME/.claude/skills"
+register "Codex"            "$HOME/.codex"          "$HOME/.codex/skills"
+register "opencode"         "$HOME/.config/opencode" "$HOME/.config/opencode/skills"
+register "Factory"          "$HOME/.factory"        "$HOME/.factory/skills"
+register "Cursor"           "$HOME/.cursor"         "$HOME/.cursor/skills"
+register "Kiro"             "$HOME/.kiro"           "$HOME/.kiro/skills"
+
+# Always seed the shared location + Claude Code even on a fresh machine, so the
+# skill is discoverable by any SKILL.md-compatible agent installed later.
+mkdir -p "$HOME/.agents/skills" && ln -sfn "$ROOT/skills/skillrot" "$HOME/.agents/skills/skillrot"
+
+cat <<EOF
+
+Done. The 'skillrot' command is on PATH and the skill is registered.
+Try:  skillrot ~/.claude/skills
+Restart your agent session so it picks up the new skill.
+EOF

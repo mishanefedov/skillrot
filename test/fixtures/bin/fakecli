@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Minimal fake CLI with a frozen --help, used for deterministic e2e tests.
+set -euo pipefail
+
+if [ "${1:-}" = "--version" ]; then
+  echo "fakecli 2.0.0"
+  exit 0
+fi
+
+if [ "${1:-}" = "do" ] && [ "${2:-}" = "--help" ]; then
+  cat <<'EOF'
+Usage: fakecli do [options]
+  --keep        keep the output
+  -n, --number  how many
+EOF
+  exit 0
+fi
+
+if [ "${1:-}" = "--help" ]; then
+  cat <<'EOF'
+Usage: fakecli <command>
+  do   run the thing
+EOF
+  exit 0
+fi
+
+echo "error: unknown command '${1:-}'" >&2
+exit 1

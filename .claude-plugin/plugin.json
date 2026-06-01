@@ -1,0 +1,9 @@
+{
+  "name": "skillrot",
+  "description": "Audit agent skills for CLI drift — finds skills that call external tools with flags or subcommands the installed version no longer accepts.",
+  "version": "0.1.0",
+  "author": { "name": "mishanefedov" },
+  "homepage": "https://github.com/mishanefedov/skillrot",
+  "repository": "https://github.com/mishanefedov/skillrot",
+  "license": "MIT"
+}

@@ -1,0 +1,19 @@
+{
+  "name": "skillrot",
+  "owner": { "name": "mishanefedov" },
+  "description": "skillrot — a linter that audits agent skills for external-CLI drift.",
+  "plugins": [
+    {
+      "name": "skillrot",
+      "source": "./",
+      "description": "Find skills that call external tools (codex, gh, docker, ...) with flags/subcommands the installed version no longer accepts.",
+      "version": "0.1.0",
+      "author": { "name": "mishanefedov" },
+      "homepage": "https://github.com/mishanefedov/skillrot",
+      "repository": "https://github.com/mishanefedov/skillrot",
+      "license": "MIT",
+      "keywords": ["claude-code", "agent-skills", "cli", "drift", "lint"],
+      "category": "dev-tools"
+    }
+  ]
+}

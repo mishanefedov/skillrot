@@ -1,0 +1,38 @@
+{
+  "name": "skillrot",
+  "version": "0.1.0",
+  "description": "Audit agent skills for CLI drift: find skills that call external tools with flags or subcommands the installed version no longer accepts.",
+  "type": "module",
+  "license": "MIT",
+  "author": "mishanefedov",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mishanefedov/skillrot.git"
+  },
+  "keywords": [
+    "claude-code",
+    "agent-skills",
+    "skill",
+    "cli",
+    "drift",
+    "lint",
+    "codex",
+    "agents"
+  ],
+  "bin": {
+    "skillrot": "bin/skillrot"
+  },
+  "scripts": {
+    "skillrot": "bun run src/cli.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "logo": "bun scripts/gen-logo.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  }
+}

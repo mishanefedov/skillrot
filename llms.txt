@@ -1,0 +1,35 @@
+# skillrot
+
+> A linter that audits coding-agent skills for external-CLI drift. Skills that
+> shell out to tools like `codex`, `gh`, `docker`, or `supabase` break silently
+> when those tools ship a new version and rename a flag or remove a subcommand —
+> the agent keeps emitting the dead command and fails mid-task. skillrot reads
+> each skill's bash, extracts the `command subcommand --flags` it uses, and
+> checks them against the installed CLI's own `--help`. Read-only: it only runs
+> `--help` and `--version`, never your real commands.
+
+Works across coding agents (Claude Code, Codex, opencode, Factory, Cursor) — any
+tool that loads `SKILL.md`-format skills.
+
+## Install
+
+- [One-line install](https://raw.githubusercontent.com/mishanefedov/skillrot/main/install.sh): `curl -fsSL https://raw.githubusercontent.com/mishanefedov/skillrot/main/install.sh | bash`
+- [Claude Code plugin](https://github.com/mishanefedov/skillrot#install): `/plugin marketplace add mishanefedov/skillrot` then `/plugin install skillrot@skillrot`
+- [INSTALL_FOR_AGENTS.md](https://github.com/mishanefedov/skillrot/blob/main/INSTALL_FOR_AGENTS.md): agent-executable runbook
+
+## Usage
+
+- `skillrot ~/.claude/skills` — audit a folder of skills (exit 1 on drift)
+- `skillrot <dir> --json` — machine-readable output
+- `skillrot <dir> --tools codex,gh,docker` — only check these CLIs
+
+## Docs
+
+- [README](https://github.com/mishanefedov/skillrot/blob/main/README.md): what it catches, how it works, roadmap
+- [SKILL.md](https://github.com/mishanefedov/skillrot/blob/main/skills/skillrot/SKILL.md): the skill definition
+- [AGENTS.md](https://github.com/mishanefedov/skillrot/blob/main/AGENTS.md): contributor / agent guide
+
+## Scope
+
+- Catches: removed or renamed flags, dead subcommands, uninstalled tools.
+- Roadmap (v2): sandboxed replay to catch semantic constraints (e.g. "flag A can't be combined with flag B").

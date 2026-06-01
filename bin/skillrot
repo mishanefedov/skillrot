@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# skillrot launcher. Lives in the plugin's bin/ (auto-added to PATH by Claude
+# Code) and is the package.json `bin` target for `bun link`. Resolves its own
+# real location — following symlinks — so it can find the bundled TS source no
+# matter where it's invoked from.
+set -euo pipefail
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+	DIR="$(cd -P "$(dirname "$SOURCE")" >/dev/null 2>&1 && pwd)"
+	SOURCE="$(readlink "$SOURCE")"
+	[[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+DIR="$(cd -P "$(dirname "$SOURCE")" >/dev/null 2>&1 && pwd)"
+ROOT="$(cd "$DIR/.." >/dev/null 2>&1 && pwd)"
+
+if ! command -v bun >/dev/null 2>&1; then
+	echo "skillrot needs Bun (https://bun.sh)." >&2
+	echo "Install: curl -fsSL https://bun.sh/install | bash" >&2
+	exit 127
+fi
+
+exec bun "$ROOT/src/cli.ts" "$@"
