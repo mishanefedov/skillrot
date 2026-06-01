@@ -3,10 +3,11 @@
 
 import { existsSync } from "node:fs";
 import { analyze } from "./analyze.ts";
+import { auditCost } from "./cost.ts";
 import { DEFAULT_ALLOWLIST, extractFromDir } from "./extract.ts";
 import { applyFixes } from "./fix.ts";
 import { introspect } from "./introspect.ts";
-import { buildReport } from "./report.ts";
+import { buildCostReport, buildReport } from "./report.ts";
 
 const HELP = `skillrot — find skills that call CLIs with flags/subcommands the installed version no longer accepts.
 
@@ -22,6 +23,9 @@ Options:
   --tools a,b,c        Only check these CLIs (default: a built-in allowlist).
   --fix                Self-heal: rewrite drifted flags to the suggested
                        replacement in place (only confident matches).
+  --cost               Context-cost audit: how many tokens your installed
+                       skills inject into every session (name + description are
+                       always loaded). Find the bloat to trim.
   --json               Emit machine-readable JSON instead of the text report.
   -h, --help           Show this help.
 
@@ -43,6 +47,7 @@ function main(argv: string[]): number {
 	let path = ".";
 	let json = false;
 	let fix = false;
+	let cost = false;
 	let tools: string[] | undefined;
 	for (let i = 0; i < args.length; i++) {
 		const a = args[i] as string;
@@ -50,6 +55,8 @@ function main(argv: string[]): number {
 			json = true;
 		} else if (a === "--fix") {
 			fix = true;
+		} else if (a === "--cost") {
+			cost = true;
 		} else if (a === "--tools") {
 			const v = args[++i];
 			if (!v || v.startsWith("-")) {
@@ -68,6 +75,12 @@ function main(argv: string[]): number {
 	if (!existsSync(path)) {
 		console.error(`skillrot: path not found: ${path}`);
 		return 2;
+	}
+
+	if (cost) {
+		const report = buildCostReport(auditCost(path));
+		console.log(json ? JSON.stringify(report.json, null, 2) : report.text);
+		return report.exitCode;
 	}
 
 	const invocations = extractFromDir(path, tools ?? DEFAULT_ALLOWLIST);

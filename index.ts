@@ -4,4 +4,6 @@ export { extractFromDir, extractFromText, parseLine, tokenize, splitSegments } f
 export { introspect, defaultRunner, probeKey } from "./src/introspect.ts";
 export { analyze, helpHasFlag, helpFlags, suggestFlag } from "./src/analyze.ts";
 export { applyFixes } from "./src/fix.ts";
-export { buildReport } from "./src/report.ts";
+export { auditCost, parseFrontmatter, estTokens } from "./src/cost.ts";
+export { findSkillDirs, findSkillMdFiles } from "./src/extract.ts";
+export { buildReport, buildCostReport } from "./src/report.ts";

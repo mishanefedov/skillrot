@@ -31,6 +31,7 @@ When installed as a plugin, `skillrot` is already on PATH:
 ```bash
 skillrot ~/.claude/skills          # scan all personal skills
 skillrot ~/.claude/skills --fix    # self-heal: rewrite confident flag renames in place
+skillrot ~/.claude/skills --cost   # context-cost audit: tokens each skill adds per session
 skillrot .                         # scan the current skill folder
 skillrot ~/.claude/skills --json   # machine-readable
 skillrot ~/.claude/skills --tools codex,gh,docker

@@ -289,21 +289,38 @@ function walk(dir: string, acc: string[] = []): string[] {
  * Scan a skills root. Each immediate subdirectory is treated as one skill.
  * A root that is itself a single skill (has SKILL.md) is scanned as one skill.
  */
+/** Discover skill directories under a root. A root that itself contains
+ *  SKILL.md is one skill; otherwise each immediate subdirectory is a skill. */
+export function findSkillDirs(root: string): Array<{ name: string; dir: string }> {
+	const entries = readdirSync(root);
+	if (entries.includes("SKILL.md")) {
+		return [{ name: root.split("/").filter(Boolean).pop() ?? root, dir: root }];
+	}
+	return entries
+		.filter((e) => {
+			try {
+				return statSync(join(root, e)).isDirectory();
+			} catch {
+				return false;
+			}
+		})
+		.map((name) => ({ name, dir: join(root, name) }));
+}
+
+/** Every SKILL.md path under a root (one per loaded skill/sub-skill). */
+export function findSkillMdFiles(root: string): Array<{ name: string; file: string }> {
+	const out: Array<{ name: string; file: string }> = [];
+	for (const { name, dir } of findSkillDirs(root)) {
+		for (const file of walk(dir)) {
+			if (file.endsWith("/SKILL.md") || file.endsWith("\\SKILL.md")) out.push({ name, file });
+		}
+	}
+	return out;
+}
+
 export function extractFromDir(root: string, allowlist?: string[]): Invocation[] {
 	const out: Invocation[] = [];
-	const entries = readdirSync(root);
-	const rootIsSkill = entries.includes("SKILL.md");
-	const skillDirs = rootIsSkill
-		? [{ name: root.split("/").filter(Boolean).pop() ?? root, dir: root }]
-		: entries
-				.filter((e) => {
-					try {
-						return statSync(join(root, e)).isDirectory();
-					} catch {
-						return false;
-					}
-				})
-				.map((name) => ({ name, dir: join(root, name) }));
+	const skillDirs = findSkillDirs(root);
 
 	for (const { name, dir } of skillDirs) {
 		for (const file of walk(dir)) {

@@ -87,6 +87,7 @@ including CI.
 ```bash
 skillrot <skills-dir>                 # text report; exit 1 if any drift
 skillrot <skills-dir> --fix           # self-heal: rewrite drifted flags in place
+skillrot <skills-dir> --cost          # context-cost audit (tokens per session)
 skillrot <skills-dir> --json          # machine-readable
 skillrot <skills-dir> --tools codex,gh,docker   # only check these CLIs
 skillrot ./skills/one-skill           # a single skill (dir with SKILL.md)
@@ -100,6 +101,28 @@ rename, plural, or extension — `--reviewers`→`--reviewer`, `--frozen`→
 in place. It only rewrites high-confidence matches, never a guess.
 
 <div align="center"><img src="assets/selfheal.png" alt="skillrot detecting, suggesting, and fixing drifted flags" width="640"></div>
+
+### Context cost (`--cost`)
+
+Every installed skill's name + description is loaded into **every session** so
+the agent knows the skill exists — the body only loads when the skill fires. So
+a big skill folder quietly taxes your context window before you type anything.
+`--cost` measures that always-on tax, ranks the heaviest descriptions, and flags
+the ones worth trimming.
+
+```text
+$ skillrot ~/.claude/skills --cost
+67 skills · ≈7.1k tokens injected into every session before you type anything
+(every skill's name + description is always loaded; bodies ≈657k tok load only when a skill fires)
+
+Heaviest always-on descriptions:
+  ≈196 tok   brief        ~/.claude/skills/brief/SKILL.md
+  ≈195 tok   plan-tune    ~/.claude/skills/plan-tune/SKILL.md
+  ...
+```
+
+It counts one SKILL.md per top-level skill (what an agent actually loads), not
+mirror copies. Token counts are a ~4-chars/token estimate (shown with `≈`).
 
 It scans `SKILL.md` bash fences and `*.sh` scripts. No build step — Bun runs the
 TypeScript directly.
@@ -133,8 +156,9 @@ cries wolf gets uninstalled.
 
 ## Scope
 
-**v1 catches:** removed/renamed flags, dead subcommands, uninstalled tools — and
-**self-heals** confident flag renames with `--fix`.
+**v1 catches:** removed/renamed flags, dead subcommands, uninstalled tools —
+**self-heals** confident flag renames with `--fix`, and audits your skills'
+always-on **context cost** with `--cost`.
 
 **Roadmap (v2):**
 
