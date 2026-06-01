@@ -33,6 +33,7 @@ export function buildReport(findings: Finding[], scanned: number): Report {
 				const mark = f.level === "error" ? red("✗") : yellow("!");
 				const loc = dim(`${f.invocation.file}:${f.invocation.line}`);
 				lines.push(`  ${mark} ${f.reason}`);
+				if (f.suggestion) lines.push(`    ${green(`→ did you mean '${f.suggestion}'? (skillrot --fix)`)}`);
 				lines.push(`    ${dim(f.invocation.raw.trim())}`);
 				lines.push(`    ${loc}`);
 			}
@@ -58,6 +59,8 @@ export function buildReport(findings: Finding[], scanned: number): Report {
 				level: f.level,
 				reason: f.reason,
 				version: f.version ?? null,
+				flag: f.flag ?? null,
+				suggestion: f.suggestion ?? null,
 			})),
 		},
 		exitCode: errors.length > 0 ? 1 : 0,

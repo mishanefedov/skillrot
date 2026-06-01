@@ -86,10 +86,20 @@ including CI.
 
 ```bash
 skillrot <skills-dir>                 # text report; exit 1 if any drift
+skillrot <skills-dir> --fix           # self-heal: rewrite drifted flags in place
 skillrot <skills-dir> --json          # machine-readable
 skillrot <skills-dir> --tools codex,gh,docker   # only check these CLIs
 skillrot ./skills/one-skill           # a single skill (dir with SKILL.md)
 ```
+
+### Self-healing
+
+When a drifted flag has a confident match in the CLI's current `--help` (a
+rename, plural, or extension — `--reviewers`→`--reviewer`, `--frozen`→
+`--frozen-lockfile`), skillrot suggests it inline and `--fix` rewrites the skill
+in place. It only rewrites high-confidence matches, never a guess.
+
+<div align="center"><img src="assets/selfheal.png" alt="skillrot detecting, suggesting, and fixing drifted flags" width="640"></div>
 
 It scans `SKILL.md` bash fences and `*.sh` scripts. No build step — Bun runs the
 TypeScript directly.
@@ -123,7 +133,8 @@ cries wolf gets uninstalled.
 
 ## Scope
 
-**v1 catches:** removed/renamed flags, dead subcommands, uninstalled tools.
+**v1 catches:** removed/renamed flags, dead subcommands, uninstalled tools — and
+**self-heals** confident flag renames with `--fix`.
 
 **Roadmap (v2):**
 

@@ -30,10 +30,14 @@ When installed as a plugin, `skillrot` is already on PATH:
 
 ```bash
 skillrot ~/.claude/skills          # scan all personal skills
+skillrot ~/.claude/skills --fix    # self-heal: rewrite confident flag renames in place
 skillrot .                         # scan the current skill folder
 skillrot ~/.claude/skills --json   # machine-readable
 skillrot ~/.claude/skills --tools codex,gh,docker
 ```
+
+When a finding shows `→ did you mean '--X'?`, run with `--fix` to rewrite it (or
+apply the suggestion yourself). `--fix` only changes high-confidence matches.
 
 If `skillrot: command not found`, Bun isn't installed — tell the user:
 `curl -fsSL https://bun.sh/install | bash`. Nothing else to set up.

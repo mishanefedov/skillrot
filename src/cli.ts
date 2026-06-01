@@ -4,6 +4,7 @@
 import { existsSync } from "node:fs";
 import { analyze } from "./analyze.ts";
 import { DEFAULT_ALLOWLIST, extractFromDir } from "./extract.ts";
+import { applyFixes } from "./fix.ts";
 import { introspect } from "./introspect.ts";
 import { buildReport } from "./report.ts";
 
@@ -19,10 +20,13 @@ Arguments:
 
 Options:
   --tools a,b,c        Only check these CLIs (default: a built-in allowlist).
+  --fix                Self-heal: rewrite drifted flags to the suggested
+                       replacement in place (only confident matches).
   --json               Emit machine-readable JSON instead of the text report.
   -h, --help           Show this help.
 
-Exit code: 1 when any drift (error-level) is found, else 0.
+Exit code: 1 when any drift (error-level) is found, else 0 (0 after --fix
+clears every error).
 
 What it checks (v1): removed/renamed flags, dead subcommands, uninstalled tools.
 It only ever runs '<tool> --help' / '--version' — never your real commands.
@@ -38,11 +42,14 @@ function main(argv: string[]): number {
 
 	let path = ".";
 	let json = false;
+	let fix = false;
 	let tools: string[] | undefined;
 	for (let i = 0; i < args.length; i++) {
 		const a = args[i] as string;
 		if (a === "--json") {
 			json = true;
+		} else if (a === "--fix") {
+			fix = true;
 		} else if (a === "--tools") {
 			const v = args[++i];
 			if (!v || v.startsWith("-")) {
@@ -66,8 +73,24 @@ function main(argv: string[]): number {
 	const invocations = extractFromDir(path, tools ?? DEFAULT_ALLOWLIST);
 	const probes = introspect(invocations);
 	const findings = analyze(invocations, probes);
-	const report = buildReport(findings, invocations.length);
 
+	if (fix) {
+		const fixes = applyFixes(findings);
+		if (json) {
+			console.log(JSON.stringify({ fixed: fixes.length, changes: fixes }, null, 2));
+		} else if (fixes.length === 0) {
+			console.log("skillrot --fix: nothing to auto-heal (no confident flag suggestions).");
+		} else {
+			console.log(`skillrot --fix: healed ${fixes.length} flag(s):`);
+			for (const c of fixes) console.log(`  ${c.from} → ${c.to}   ${c.file}:${c.line}`);
+		}
+		// Re-scan so the exit code reflects the post-fix state.
+		const reInv = extractFromDir(path, tools ?? DEFAULT_ALLOWLIST);
+		const after = analyze(reInv, introspect(reInv));
+		return after.some((f) => f.level === "error") ? 1 : 0;
+	}
+
+	const report = buildReport(findings, invocations.length);
 	console.log(json ? JSON.stringify(report.json, null, 2) : report.text);
 	return report.exitCode;
 }

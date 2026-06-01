@@ -27,6 +27,10 @@ export interface Finding {
 	reason: string;
 	/** Installed version of the CLI, when known. */
 	version?: string;
+	/** The drifted flag this finding is about (set for flag-level findings). */
+	flag?: string;
+	/** Closest valid flag from the CLI's --help, when one is confidently near. */
+	suggestion?: string;
 }
 
 /** Result of running a command (defaultRunner or an injected fake). */
