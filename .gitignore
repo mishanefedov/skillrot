@@ -6,3 +6,4 @@ bun.lockb
 .env.*
 dist/
 .serena/
+*.tgz
