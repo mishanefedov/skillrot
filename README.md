@@ -199,6 +199,11 @@ always-on **context cost** with `--cost`.
 the tools a skill needs are *installed*. skillrot is the other half: it checks
 they're *used correctly for the version installed*. Presence vs. correctness.
 
+[`skill-issue`](https://github.com/mishanefedov/skill-issue) is the sibling tool:
+it checks whether your skills *fire at all* — grading each skill's name +
+description on activation and catching collisions where one skill silently
+shadows another. Activation vs. drift.
+
 ## License
 
 MIT
