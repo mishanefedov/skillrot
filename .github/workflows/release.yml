@@ -1,0 +1,104 @@
+name: release
+
+# Push a version tag to ship everything in one go:
+#   npm version 0.2.0 --no-git-tag-version && git commit -am "v0.2.0" && git tag v0.2.0 && git push --tags
+# Produces: standalone binaries on the GitHub Release, an npm publish, and a
+# Homebrew tap bump.
+#
+# Required secrets:
+#   NPM_TOKEN           — npm automation token (Settings → Access Tokens). Without it the npm job no-ops.
+#   HOMEBREW_TAP_TOKEN  — PAT with `repo` scope on mishanefedov/homebrew-tap. Without it the brew step no-ops.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  binaries:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun test
+
+      - name: Compile standalone binaries
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          mkdir -p out sums
+          targets="darwin-arm64 darwin-x64 linux-x64 linux-arm64 windows-x64"
+          for t in $targets; do
+            ext=""
+            [ "$t" = "windows-x64" ] && ext=".exe"
+            out="out/skillrot-$t$ext"
+            echo "→ $out"
+            bun build src/cli.ts --compile --target="bun-$t" --outfile "$out"
+            ( cd out && shasum -a 256 "skillrot-$t$ext" | awk '{print $1}' > "../sums/skillrot-$t.sha256" )
+          done
+          ( cd out && shasum -a 256 skillrot-* > SHA256SUMS )
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes \
+            out/skillrot-* out/SHA256SUMS
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sums
+          path: sums/
+
+  npm:
+    needs: binaries
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+      - run: bun install --frozen-lockfile
+      - name: Publish to npm
+        if: env.NODE_AUTH_TOKEN != ''
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          npm version "$VERSION" --no-git-tag-version --allow-same-version
+          npm publish --access public
+
+  homebrew:
+    needs: binaries
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: sums
+          path: sums/
+      - name: Bump Homebrew tap
+        if: env.TAP_TOKEN != ''
+        env:
+          TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          git clone "https://x-access-token:${TAP_TOKEN}@github.com/mishanefedov/homebrew-tap.git" tap
+          mkdir -p tap/Formula
+          bash scripts/render-formula.sh "$VERSION" sums > tap/Formula/skillrot.rb
+          cd tap
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/skillrot.rb
+          git commit -m "skillrot ${VERSION}" || { echo "no change"; exit 0; }
+          git push

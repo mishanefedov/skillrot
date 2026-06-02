@@ -9,6 +9,8 @@
     "type": "git",
     "url": "https://github.com/mishanefedov/skillrot.git"
   },
+  "homepage": "https://github.com/mishanefedov/skillrot",
+  "bugs": "https://github.com/mishanefedov/skillrot/issues",
   "keywords": [
     "claude-code",
     "agent-skills",
@@ -20,10 +22,18 @@
     "agents"
   ],
   "bin": {
-    "skillrot": "bin/skillrot"
+    "skillrot": "dist/skillrot.mjs"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "llms.txt"
+  ],
   "scripts": {
     "skillrot": "bun run src/cli.ts",
+    "build": "bun run scripts/build.ts",
+    "prepack": "bun run scripts/build.ts",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "logo": "bun scripts/gen-logo.ts"
@@ -33,6 +43,6 @@
     "typescript": "^5"
   },
   "engines": {
-    "bun": ">=1.0.0"
+    "node": ">=18"
   }
 }
