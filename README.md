@@ -8,7 +8,7 @@
 
 <a href="https://github.com/mishanefedov/skillrot/stargazers"><img src="https://img.shields.io/github/stars/mishanefedov/skillrot?style=flat&color=4ade80" alt="Stars"></a>
 <a href="https://github.com/mishanefedov/skillrot/commits/main"><img src="https://img.shields.io/github/last-commit/mishanefedov/skillrot?style=flat" alt="Last commit"></a>
-<a href="LICENSE"><img src="https://img.shields.io/github/license/mishanefedov/skillrot?style=flat" alt="License"></a>
+<a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-4ade80?style=flat" alt="License: MIT"></a>
 <img src="https://img.shields.io/badge/agents-Claude%20Code%20·%20Codex%20·%20Cursor%20·%20opencode%20·%20Factory-444" alt="Agents">
 
 </div>
