@@ -46,13 +46,36 @@ class of bug — every skill that wraps a CLI is exposed — and nothing was che
 for it. (That specific *constraint* case is the [v2 target](#scope); v1 catches
 the far more common removed/renamed flags and dead subcommands.)
 
+## Try it (no install)
+
+```bash
+npx skillrot ~/.claude/skills        # or: bunx skillrot ~/.claude/skills
+```
+
+Zero install — it runs straight off npm with just Node (or Bun). Point it at any
+skills folder and see if anything's rotten before you decide to keep it around.
+
 ## Install
 
-skillrot is both a **skill** (the audit logic) and a small **Bun CLI** (the
-engine). All paths need [Bun](https://bun.sh) (`curl -fsSL https://bun.sh/install | bash`).
+skillrot is both a **skill** (the audit logic) and a small, dependency-free
+**CLI** (the engine). The CLI is a single bundle that runs on plain Node — no
+Bun required to use it.
 
-**Any agent — one line** (registers the skill with every coding agent on the
-machine and puts `skillrot` on PATH):
+**Homebrew:**
+
+```bash
+brew install mishanefedov/tap/skillrot
+```
+
+**npm (global command):**
+
+```bash
+npm install -g skillrot
+```
+
+**Any agent — one line** (downloads a prebuilt, self-contained binary — no
+Node/Bun needed — and registers the skill with every coding agent on the
+machine):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/mishanefedov/skillrot/main/install.sh | bash
@@ -66,8 +89,7 @@ curl -fsSL https://raw.githubusercontent.com/mishanefedov/skillrot/main/install.
 /reload-plugins
 ```
 
-**Skill-only** via the cross-agent skills installer (you'll still need the CLI
-from one of the paths above):
+**Skill-only** via the cross-agent skills installer:
 
 ```bash
 npx skills add mishanefedov/skillrot --skill skillrot --global --all
@@ -124,8 +146,7 @@ Heaviest always-on descriptions:
 It counts one SKILL.md per top-level skill (what an agent actually loads), not
 mirror copies. Token counts are a ~4-chars/token estimate (shown with `≈`).
 
-It scans `SKILL.md` bash fences and `*.sh` scripts. No build step — Bun runs the
-TypeScript directly.
+It scans `SKILL.md` bash fences and `*.sh` scripts.
 
 ## What it catches (v1)
 
@@ -168,8 +189,9 @@ always-on **context cost** with `--cost`.
   a disposable, network-less container and read the argument-parse error.
 - **Version stamping** — record the CLI versions a skill was validated against
   and flag drift since.
-- **Native packaging per agent** (Codex/Cursor marketplaces) and a published CLI
-  (npm / prebuilt binaries) so install needs zero prerequisites.
+- **Native packaging per agent** (Codex/Cursor marketplaces). The CLI itself
+  already ships with zero prerequisites — `npx skillrot`, `npm install -g`,
+  `brew install`, or a prebuilt binary.
 
 ## Prior art
 

@@ -4,3 +4,6 @@ bun.lockb
 .DS_Store
 .env
 .env.*
+dist/
+.serena/
+*.tgz

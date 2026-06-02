@@ -9,7 +9,7 @@ description: >
   skills", or after upgrading a CLI a skill depends on.
 allowed-tools: Bash(skillrot:*)
 license: MIT
-compatibility: Requires Bun and the skillrot CLI on PATH.
+compatibility: Needs the skillrot CLI on PATH (npm i -g skillrot, brew, prebuilt binary, or bunx skillrot).
 ---
 
 # skillrot — skill CLI drift audit
@@ -40,8 +40,9 @@ skillrot ~/.claude/skills --tools codex,gh,docker
 When a finding shows `→ did you mean '--X'?`, run with `--fix` to rewrite it (or
 apply the suggestion yourself). `--fix` only changes high-confidence matches.
 
-If `skillrot: command not found`, Bun isn't installed — tell the user:
-`curl -fsSL https://bun.sh/install | bash`. Nothing else to set up.
+If `skillrot: command not found`, run it with no install via `npx skillrot <dir>`
+(or `bunx skillrot <dir>`), or install it permanently with `npm i -g skillrot`
+or `brew install mishanefedov/tap/skillrot`.
 
 `<dir>` is a folder where each subdirectory is one skill, or a single skill
 directory containing `SKILL.md`. It scans `SKILL.md` bash fences and `*.sh`
